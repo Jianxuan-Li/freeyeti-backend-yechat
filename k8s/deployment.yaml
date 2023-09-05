@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: freeyeti-backend-yechat
+  labels:
+    app: freeyeti-backend-yechat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: freeyeti-backend-yechat
+  template:
+    metadata:
+      labels:
+        app: freeyeti-backend-yechat
+    spec:
+      imagePullSecrets:
+        - name: __PULL_SECRET__
+      containers:
+        - name: freeyeti-backend-yechat
+          image: __IMAGE_BACKEND__:__IMAGE_TAG__
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8001
+          env:
+            - name: NODE_ENV
+              value: production

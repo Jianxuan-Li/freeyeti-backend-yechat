@@ -1,0 +1,12 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: freeyeti-backend-yechat
+spec:
+  selector:
+    app: freeyeti-backend-yechat
+  ports:
+    - protocol: TCP
+      port: 8001
+      targetPort: 8001
+      name: http

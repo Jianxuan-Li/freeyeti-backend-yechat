@@ -1,0 +1,144 @@
+name: release
+
+# on:
+#   push:
+#     branches:
+#       - main
+#       - master
+
+on:
+  release:
+    types: [published]
+
+env:
+  # Define image names
+  BACKEND_IMAGE: ghcr.io/jianxuan-li/freeyeti-backend-yechat
+  REGISTRY: ghcr.io
+
+
+jobs:
+  config:
+    runs-on: [ubuntu-latest]
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref_name }}
+        
+      - name: Check output
+        run: |
+          echo ${{ github.ref_name }}
+          echo ${{ github.ref_name }} > version.txt
+          
+      - name: Upload version file
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ github.event.repository.name }}-deployment
+          path: version.txt
+
+  # Build and push image to Docker registry.
+  build-backend:
+    # Ensure config job passes before building image.
+    needs: config
+
+    runs-on: [ubuntu-latest]
+
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.ACTIONS_CR_TK }}
+
+      - name: Check image version
+        env:
+          IMAGE_TAG: ${{ github.ref_name }}
+        run: |
+          echo $IMAGE_TAG
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.BACKEND_IMAGE }}
+
+      -
+        name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          file: ./Dockerfile
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          target: django
+
+  ## Generate deployment files.
+  generate-artifacts:
+    # Ensure django image is built before run testing.
+    needs: build-nginx
+
+    runs-on: [ubuntu-latest]
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref_name }}
+          
+      - name: Check image version
+        env:
+          IMAGE_TAG: ${{ github.ref_name }}
+        run: |
+          echo $IMAGE_TAG
+      - name: Generate deployment files
+        env:
+          IMAGE_TAG: ${{ github.ref_name }}
+          PULL_SECRET: ${{ secrets.PULL_SECRET }}
+        run: |
+          sed -i "s@__IMAGE_BACKEND__@$BACKEND_IMAGE@g" k8s/deployment.yaml
+          sed -i "s@__IMAGE_TAG__@$IMAGE_TAG@g" k8s/deployment.yaml
+          sed -i "s@__PULL_SECRET__@$PULL_SECRET@g" k8s/deployment.yaml
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ github.event.repository.name }}-deployment
+          path: |
+            k8s/deployment.yaml
+            k8s/service.yaml
+
+  deploy:
+    needs: generate-artifacts
+
+    runs-on: [ubuntu-latest]
+
+    steps:
+      - name: download deployment files
+        uses: actions/download-artifact@v3
+        env:
+          IMAGE_TAG: ${{ github.ref_name }}
+        with:
+          name: ${{ github.event.repository.name }}-deployment
+          path: ${{ github.ref_name }}
+      
+      - name: scp to server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_PRIVATE_KEY }}
+          source: ${{ github.ref_name }}
+          target: ${{ secrets.DEPLOYMENTS_PATH }}
+          
+      - name : ssh to server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_PRIVATE_KEY }}
+          script: |
+            kubectl apply -f ${{secrets.DEPLOYMENTS_PATH}}/${{ github.ref_name }}/deployment.yaml
+            kubectl apply -f ${{secrets.DEPLOYMENTS_PATH}}/${{ github.ref_name }}/service.yaml
