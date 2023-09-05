@@ -70,11 +70,9 @@ jobs:
           file: ./Dockerfile
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          target: django
 
   ## Generate deployment files.
   generate-artifacts:
-    # Ensure django image is built before run testing.
     runs-on: [ubuntu-latest]
 
     steps:
