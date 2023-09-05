@@ -7,35 +7,27 @@ import {
   MessageBody,
   ConnectedSocket,
 } from '@nestjs/websockets';
-import { Socket } from 'socket.io';
+import { Server } from 'ws';
 
 @WebSocketGateway({
   path: '/chat-server',
-  cors: {
-    origin: '*',
-  },
 })
 export class ChatWebsocketGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
-  @WebSocketServer() server;
+  @WebSocketServer()
+  server: Server;
 
-  handleConnection(socket: Socket): void {
-    const socketId = socket.id;
-    console.log(`New connecting... socket id:`, socketId);
+  handleConnection(client: any): void {
+    console.log(`New connecting`);
   }
 
-  handleDisconnect(socket: Socket): void {
-    const socketId = socket.id;
-    console.log(`Disconnection... socket id:`, socketId);
+  handleDisconnect(client: any): void {
+    console.log(`Disconnection`);
   }
 
   @SubscribeMessage('message')
-  async identity(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() data: number,
-  ): Promise<number> {
-    console.log('message', data);
+  async identity(client: any, data: any): Promise<number> {
     this.server.emit('message', data);
     return data;
   }
