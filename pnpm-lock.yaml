@@ -35,6 +35,9 @@ dependencies:
   reflect-metadata:
     specifier: ^0.1.13
     version: 0.1.13
+  short-unique-id:
+    specifier: ^5.0.2
+    version: 5.0.2
   ws:
     specifier: ^8.13.0
     version: 8.13.0
@@ -85,9 +88,6 @@ devDependencies:
   prettier:
     specifier: ^3.0.0
     version: 3.0.3
-  short-unique-id:
-    specifier: ^5.0.2
-    version: 5.0.2
   source-map-support:
     specifier: ^0.5.21
     version: 0.5.21
@@ -4766,7 +4766,7 @@ packages:
   /short-unique-id@5.0.2:
     resolution: {integrity: sha512-4wZq1VLV4hsEx8guP5bN7XnY8UDsVXtdUDWFMP1gvEieAXolq5fWGKpuua21PRXaLn3OybTKFQNm7JGcHSWu/Q==}
     hasBin: true
-    dev: true
+    dev: false
 
   /side-channel@1.0.4:
     resolution: {integrity: sha512-q5XPytqFEIKHkGdiMIrY10mvLRvnQh42/+GoBlFW3b2LXLE2xxJpZFdm94we0BaoV3RwJyGqg5wS7epxTv0Zvw==}
