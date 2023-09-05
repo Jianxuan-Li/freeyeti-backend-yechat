@@ -16,7 +16,7 @@ env:
   REGISTRY: ghcr.io
 
 jobs:
-  config:
+  version:
     runs-on: [ubuntu-latest]
 
     steps:
@@ -37,9 +37,6 @@ jobs:
 
   # Build and push image to Docker registry.
   build-backend:
-    # Ensure config job passes before building image.
-    needs: config
-
     runs-on: [ubuntu-latest]
 
     steps:
