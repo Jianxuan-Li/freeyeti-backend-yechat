@@ -10,6 +10,7 @@ import {
 import { Socket } from 'socket.io';
 
 @WebSocketGateway({
+  path: '/chat-server',
   cors: {
     origin: '*',
   },
