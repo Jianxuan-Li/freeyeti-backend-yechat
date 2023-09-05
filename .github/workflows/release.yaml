@@ -15,7 +15,6 @@ env:
   BACKEND_IMAGE: ghcr.io/jianxuan-li/freeyeti-backend-yechat
   REGISTRY: ghcr.io
 
-
 jobs:
   config:
     runs-on: [ubuntu-latest]
@@ -24,12 +23,12 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.ref_name }}
-        
+
       - name: Check output
         run: |
           echo ${{ github.ref_name }}
           echo ${{ github.ref_name }} > version.txt
-          
+
       - name: Upload version file
         uses: actions/upload-artifact@v3
         with:
@@ -66,8 +65,7 @@ jobs:
         with:
           images: ${{ env.BACKEND_IMAGE }}
 
-      -
-        name: Build and push
+      - name: Build and push
         uses: docker/build-push-action@v3
         with:
           context: .
@@ -80,15 +78,13 @@ jobs:
   ## Generate deployment files.
   generate-artifacts:
     # Ensure django image is built before run testing.
-    needs: build-nginx
-
     runs-on: [ubuntu-latest]
 
     steps:
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.ref_name }}
-          
+
       - name: Check image version
         env:
           IMAGE_TAG: ${{ github.ref_name }}
@@ -111,7 +107,7 @@ jobs:
             k8s/service.yaml
 
   deploy:
-    needs: generate-artifacts
+    needs: [build-backend, generate-artifacts]
 
     runs-on: [ubuntu-latest]
 
@@ -123,7 +119,7 @@ jobs:
         with:
           name: ${{ github.event.repository.name }}-deployment
           path: ${{ github.ref_name }}
-      
+
       - name: scp to server
         uses: appleboy/scp-action@master
         with:
@@ -132,8 +128,8 @@ jobs:
           key: ${{ secrets.SERVER_PRIVATE_KEY }}
           source: ${{ github.ref_name }}
           target: ${{ secrets.DEPLOYMENTS_PATH }}
-          
-      - name : ssh to server
+
+      - name: ssh to server
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
