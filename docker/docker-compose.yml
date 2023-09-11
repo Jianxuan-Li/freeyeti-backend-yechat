@@ -1,0 +1,22 @@
+version: "3.5"
+
+services:
+  postgis:
+    image: postgis/postgis:15-3.3
+    ports:
+      - "0.0.0.0:5433:5433"
+    volumes:
+      - postgisdb:/var/lib/postgresql/data
+    env_file:
+      - ../.env
+  cache:
+    image: redis:7
+    ports:
+      - '6379:6379'
+    command: redis-server --save 60 1 --loglevel warning --requirepass aklsdfjlaekfeiaoeijfaoe
+    volumes: 
+      - cache:/data
+
+volumes:
+  postgisdb:
+  cache:

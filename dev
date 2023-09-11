@@ -1,0 +1,28 @@
+#!/bin/bash
+if [ $1 == "" ]; then
+    echo $"Usage: $0 {up|down}"
+    exit 0
+fi
+
+# constant: project name
+PROJECT_NAME="yechat"
+
+case $1 in
+    up)
+        if [ -z "$IN_CONTAINER" ] && [ "$IN_CONTAINER" == "yes" ]; then
+            echo "Use this command out of container."
+            exit 0
+        fi
+        docker compose -p $PROJECT_NAME -f ./docker/docker-compose.yml up -d
+        ;;
+    down)
+        if [ -z "$IN_CONTAINER" ] && [ "$IN_CONTAINER" == "yes" ]; then
+            echo "Use this command out of container."
+            exit 0
+        fi
+        docker compose -p $PROJECT_NAME -f ./docker/docker-compose.yml down
+        ;;
+    -h | --help)
+        echo $"Usage: $0 {up|down}"
+        ;;
+esac
