@@ -6,7 +6,7 @@ By Nestjs, Socket.io, Redis, Elasticsearch
 
 ![architect](./docs/architect.png)
 
-* Backend (CMS and YetiBe): [https://github.com/Jianxuan-Li/yetien-backend](https://github.com/Jianxuan-Li/freeyeti-backend)
+* Backend (CMS and YetiBe): [https://github.com/Jianxuan-Li/freeyeti-backend](https://github.com/Jianxuan-Li/freeyeti-backend)
 * Frontend: https://github.com/Jianxuan-Li/freeyeti-frontend-nextjs
 
 ## Installation
