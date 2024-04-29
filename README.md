@@ -30,6 +30,9 @@ $ pnpm install
 * `pnpm run test:e2e` e2e tests
 * `pnpm run test:cov` test coverage
 
-## License
+## DB
 
-MIT licensed
+```
+CREATE DATABASE yechat;
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+```

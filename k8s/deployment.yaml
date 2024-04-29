@@ -22,6 +22,9 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8001
+          envFrom:
+            - configMapRef:
+                name: yechat-server-env-config
           env:
             - name: NODE_ENV
               value: production
